@@ -1,0 +1,35 @@
+<dataConfig>
+    <dataSource naem="mall" type="JdbcDataSource" driver="com.mysql.jdbc.Driver" 
+     url="jdbc:mysql://localhost:3306/mall?useUnicode=true&amp;characterEncoding=utf-8" user="root" password="" />
+    <document name="commodity">
+		<entity name="commodity" pk="id" 
+				query="select c.id, c.sku, c.productId, c.mainPicture, c.title, c.subtitle, c.salePrice, c.lastModifyTime from commodity c"
+				deltaQuery="select id from commodity c where c.lastModifyTime > '${dataimporter.last_index_time}'">
+			
+			<entity name="commodity2propertyItem" pk="commodityId, propertyItemId"
+					query="select c2p.propertyItemId from commodity2propertyItem c2p where c2p.commodityId='${commodity.id}'"
+					deltaQuery = "select c2p.commodityId, c2p.propertyItemId from commodity2propertyItem c2p where c2p.lastModifyTime > '${dataimporter.last_index_time}'"
+					parentDeltaQuery = "select c.id from commodity c where id='${commodity2propertyItem.commodityId}'" >
+					
+				<entity name="propertyItem" pk="id"
+						query="select CONCAT(p.propertyId, ':', p.itemName) as property from propertyItem p where p.id='${commodity2propertyItem.propertyItemId}'"
+						deltaQuery = "select p.id from propertyItem p where p.lastModifyTime > '${dataimporter.last_index_time}'"
+						parentDeltaQuery = "select c2p.commodityId, c2p.propertyItemId from commodity2propertyItem c2p where c2p.propertyItemId='${propertyItem.id}'" >
+				</entity>
+			</entity>
+			
+			<entity name="commodity2specItem" pk="commodityId, specItemId"
+					query="select c2p.specItemId from commodity2specItem c2p where c2p.commodityId='${commodity.id}'"
+					deltaQuery = "select c2p.commodityId, c2p.specItemId from commodity2specItem c2p where c2p.lastModifyTime > '${dataimporter.last_index_time}'"
+					parentDeltaQuery = "select c.id from commodity c where id='${commodity2specItem.commodityId}'" >
+					
+				<entity name="specItem" pk="id"
+						query="select CONCAT(p.specId, ':', p.itemName) as spec from specItem p where p.id='${commodity2specItem.specItemId}'"
+						deltaQuery = "select p.id from specItem p where p.lastModifyTime > '${dataimporter.last_index_time}'"
+						parentDeltaQuery = "select c2p.commodityId, c2p.specItemId from commodity2specItem c2p where c2p.specItemId='${specItem.id}'" >
+				</entity>
+			</entity>
+			
+		</entity>
+	</document>
+</dataConfig>
